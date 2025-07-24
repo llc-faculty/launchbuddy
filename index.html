@@ -2,36 +2,37 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>UniBuddy Chatbot</title>
+  <title>LaunchBuddy Chatbot</title>
   <style>
-    #chat { width: 300px; font-family: Arial, sans-serif; }
+    #chat { width: 300px; font-family: Arial, sans-serif; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f9f9f9; }
     .msg { margin: 5px 0; }
-    .bot { color: #555; }
+    .bot { color: #333; }
     .user { text-align: right; color: #006; }
     .btn { padding: 5px 8px; margin: 3px; background: #eee; border: none; cursor: pointer; }
   </style>
 </head>
 <body>
+  <h2>🎓 Welcome to LaunchBuddy</h2>
   <div id="chat"></div>
-  <input id="inp" placeholder="Say hi…" style="width: 240px;" />
+  <input id="inp" placeholder="Type your question..." style="width: 240px;" />
   <button onclick="send()" style="width: 50px;">Send</button>
 
   <script>
     const chat = document.getElementById('chat');
     const msgs = [
-      {q: /hello|hi|hey/i, a: "👋 Hi, I'm UniBuddy! Want the induction schedule or have questions?" },
+      {q: /hello|hi|hey/i, a: "👋 Hey there! I’m LaunchBuddy, your guide to induction week. Want the schedule or have a question?" },
       {q: /schedule|week|induction/i, a: 
-        `Your week: 
-        Mon – Welcome + tour at 10am 🍂<br>
-        Tue – ID collection all day 🆔<br>
-        Wed – Course meet at 2pm<br>
-        Thu – Societies fair 11–3pm<br>
-        Fri – Pizza + Q&A noon`
+        `Here’s your induction week:
+        <br>📅 <b>Monday</b>: Welcome talk & tour – 10:00 AM, Main Hall
+        <br>🆔 <b>Tuesday</b>: Student ID collection – All day, Library Foyer
+        <br>👨‍🏫 <b>Wednesday</b>: Meet your course leader – 2:00 PM, Room B101
+        <br>🎪 <b>Thursday</b>: Societies Fair – 11 AM–3 PM, Student Union
+        <br>🍕 <b>Friday</b>: Free pizza + Q&A – 12 PM, Courtyard`
       },
-      {q: /id|student id/i, a: "Collect your ID at the Library Foyer, anytime during the day." },
-      {q: /clubs|societies/i, a: "Visit the Societies Fair Thursday 11–3pm at Student Union to join clubs." },
-      {q: /tutor|personal tutor/i, a: "Your personal tutor info will be emailed. Ask admin if you don't get it." },
-      {q: /.*/, a: "Sorry, I didn't understand that. You can ask about schedule, ID, clubs, or campus!" }
+      {q: /id|student id/i, a: "🆔 Collect your student ID from the Library Foyer — it's open all day on Tuesday." },
+      {q: /clubs|societies/i, a: "🎉 Visit the Societies Fair on Thursday (11–3 PM) in the Student Union to join clubs and meet groups." },
+      {q: /tutor|personal tutor/i, a: "👩‍🏫 You'll get an email with your personal tutor’s info. If not, contact your department office." },
+      {q: /.*/, a: "Hmm 🤔 I didn’t catch that. You can ask me about the schedule, student ID, societies, or tutors!" }
     ];
 
     function append(text, who) {
@@ -59,7 +60,7 @@
     }
 
     // Greet on load
-    window.onload = () => append("👋 Hi, I'm UniBuddy! Type 'schedule' or ask me a question.", 'bot');
+    window.onload = () => append("👋 Hi, I’m LaunchBuddy! Ask me about induction week or type 'schedule' to start.", 'bot');
   </script>
 </body>
 </html>
