@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>UniBuddy Chatbot</title>
+  <style>
+    #chat { width: 300px; font-family: Arial, sans-serif; }
+    .msg { margin: 5px 0; }
+    .bot { color: #555; }
+    .user { text-align: right; color: #006; }
+    .btn { padding: 5px 8px; margin: 3px; background: #eee; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="chat"></div>
+  <input id="inp" placeholder="Say hi…" style="width: 240px;" />
+  <button onclick="send()" style="width: 50px;">Send</button>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const msgs = [
+      {q: /hello|hi|hey/i, a: "👋 Hi, I'm UniBuddy! Want the induction schedule or have questions?" },
+      {q: /schedule|week|induction/i, a: 
+        `Your week: 
+        Mon – Welcome + tour at 10am 🍂<br>
+        Tue – ID collection all day 🆔<br>
+        Wed – Course meet at 2pm<br>
+        Thu – Societies fair 11–3pm<br>
+        Fri – Pizza + Q&A noon`
+      },
+      {q: /id|student id/i, a: "Collect your ID at the Library Foyer, anytime during the day." },
+      {q: /clubs|societies/i, a: "Visit the Societies Fair Thursday 11–3pm at Student Union to join clubs." },
+      {q: /tutor|personal tutor/i, a: "Your personal tutor info will be emailed. Ask admin if you don't get it." },
+      {q: /.*/, a: "Sorry, I didn't understand that. You can ask about schedule, ID, clubs, or campus!" }
+    ];
+
+    function append(text, who) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + who;
+      div.innerHTML = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function send() {
+      const input = document.getElementById('inp');
+      const text = input.value.trim();
+      if (!text) return;
+      append(text, 'user');
+      input.value = '';
+      setTimeout(() => {
+        for (let {q, a} of msgs) {
+          if (q.test(text)) {
+            append(a, 'bot');
+            return;
+          }
+        }
+      }, 300);
+    }
+
+    // Greet on load
+    window.onload = () => append("👋 Hi, I'm UniBuddy! Type 'schedule' or ask me a question.", 'bot');
+  </script>
+</body>
+</html>
