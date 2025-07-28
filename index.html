@@ -1,45 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>LaunchBuddy Chatbot</title>
   <style>
-    #chat { width: 300px; font-family: Arial, sans-serif; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f9f9f9; }
-    .msg { margin: 5px 0; }
-    .bot { color: #333; }
-    .user { text-align: right; color: #006; }
-    .btn { padding: 5px 8px; margin: 3px; background: #eee; border: none; cursor: pointer; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    #chatbox {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .msg { margin: 10px 0; padding: 10px; border-radius: 10px; line-height: 1.4em; }
+    .bot { background: #e0f0ff; text-align: left; border-top-left-radius: 0; }
+    .user { background: #d0ffd8; text-align: right; border-top-right-radius: 0; }
+    .avatar {
+  width: 40px;
+  vertical-align: middle;
+  margin-right: 5px;
+  border-radius: 50%;
+}
+    .options button {
+      background: #eee; border: none; margin: 4px; padding: 8px 12px;
+      border-radius: 5px; cursor: pointer;
+    }
+    #inputArea { margin-top: 10px; display: flex; gap: 10px; }
+    input[type="text"] {
+      flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <h2>🎓 Welcome to LaunchBuddy</h2>
-  <div id="chat"></div>
-  <input id="inp" placeholder="Type your question..." style="width: 240px;" />
-  <button onclick="send()" style="width: 50px;">Send</button>
+  <div id="chatbox">
+    <div id="chat"></div>
+    <div id="inputArea">
+      <input type="text" id="inp" placeholder="Ask a question..."/>
+      <button onclick="send()">Send</button>
+    </div>
+  </div>
 
   <script>
     const chat = document.getElementById('chat');
-    const msgs = [
-      {q: /hello|hi|hey/i, a: "👋 Hey there! I’m LaunchBuddy, your guide to induction week. Want the schedule or have a question?" },
-      {q: /schedule|week|induction/i, a: 
-        `Here’s your induction week:
-        <br>📅 <b>Monday</b>: Welcome talk & tour – 10:00 AM, Main Hall
-        <br>🆔 <b>Tuesday</b>: Student ID collection – All day, Library Foyer
-        <br>👨‍🏫 <b>Wednesday</b>: Meet your course leader – 2:00 PM, Room B101
-        <br>🎪 <b>Thursday</b>: Societies Fair – 11 AM–3 PM, Student Union
-        <br>🍕 <b>Friday</b>: Free pizza + Q&A – 12 PM, Courtyard`
-      },
-      {q: /id|student id/i, a: "🆔 Collect your student ID from the Library Foyer — it's open all day on Tuesday." },
-      {q: /clubs|societies/i, a: "🎉 Visit the Societies Fair on Thursday (11–3 PM) in the Student Union to join clubs and meet groups." },
-      {q: /tutor|personal tutor/i, a: "👩‍🏫 You'll get an email with your personal tutor’s info. If not, contact your department office." },
-      {q: /.*/, a: "Hmm 🤔 I didn’t catch that. You can ask me about the schedule, student ID, societies, or tutors!" }
-    ];
 
-    function append(text, who) {
+    const faq = {
+      "settling": [
+        ["Does everyone know more than I do?", "No! Relax. Somebody might have a bit of info you don’t yet, but that’s always true. By Christmas, you won’t even remember worrying about this."],
+        ["Is it OK to be scared?", "Yes — pretty much everyone is. You're doing something new. Your confidence will grow quickly and you’ll settle in. Year one is about finding your feet and foundation knowledge."]
+      ],
+      "essentials": [
+        ["What do I need to know about registration and modules?", "You need to register as a student. Visit the ground floor of the Parkinson Building, or register online. Your compulsory modules will be added automatically."],
+        ["How important is my university email?", "Very, very, very important. We’ll switch to only using your uni email quickly — add it to your phone early so you don’t miss anything."],
+        ["What essential things do I need to do in the first two weeks?", "If you're registered and enrolled, you're set! Explore Minerva, visit the Union, try a tour, and start building your routine."]
+      ],
+      "academic": [
+        ["Do I get a personal tutor?", "Yes! Your Academic Personal Tutor (APT) supports you all through your studies. Meet them early and keep in touch for both academic and personal support."],
+        ["How do I avoid plagiarism?", "Don’t worry — guidance will come. Focus on settling in first. Later, you’ll learn about academic integrity and referencing. If you're curious, check the Library site."]
+      ],
+      "support": [
+        ["I’m a disabled student — what should I do?", "If we haven’t already contacted you, self-refer to Disability Services ASAP. You may also need a needs assessment. We’ll get support in place quickly."]
+      ],
+      "programme": [
+        ["I'm a Joint Honours student — how does it work?", "You have a parent (LCS) and a partner school. Your tutor is in LCS. You may feel more connection to LCS — that’s normal. Ask your tutor if you need help."]
+      ],
+      "identity": [
+        ["Am I in the right place?", "Many students arrive from different routes — Foundation Years, Access, school, etc. If you're unsure about your programme, speak to your APT or Programme Support quickly."]
+      ]
+    };
+
+    function append(text, who="bot") {
       const div = document.createElement('div');
       div.className = 'msg ' + who;
-      div.innerHTML = text;
+      div.innerHTML = who === "bot"
+        ? `<img src="https://campuspress.leeds.ac.uk/launchlcs/files/2025/07/rp_chatbot.jpg" class="avatar" alt="LaunchBuddy"/>
+ <span>${text}</span>`
+        : text;
       chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function showOptions() {
+      const div = document.createElement('div');
+      div.className = 'options';
+      div.innerHTML = `
+        <p><strong>What would you like help with?</strong></p>
+        <button onclick="listQuestions('settling')">👋 Settling In</button>
+        <button onclick="listQuestions('essentials')">📋 Essentials</button>
+        <button onclick="listQuestions('academic')">🎓 Academic Support</button>
+        <button onclick="listQuestions('programme')">🧭 Programme Info</button>
+        <button onclick="listQuestions('support')">♿ Support</button>
+        <button onclick="listQuestions('identity')">❓ Feeling Unsure</button>
+      `;
+      chat.appendChild(div);
+    }
+
+    function listQuestions(topic) {
+      faq[topic].forEach(([q, a]) => {
+        const btn = document.createElement('button');
+        btn.innerText = q;
+        btn.onclick = () => {
+          append(q, 'user');
+          setTimeout(() => append(a, 'bot'), 300);
+        };
+        chat.appendChild(btn);
+      });
       chat.scrollTop = chat.scrollHeight;
     }
 
@@ -49,18 +114,28 @@
       if (!text) return;
       append(text, 'user');
       input.value = '';
+
       setTimeout(() => {
-        for (let {q, a} of msgs) {
-          if (q.test(text)) {
-            append(a, 'bot');
-            return;
+        let answered = false;
+        for (let topic in faq) {
+          for (let [q, a] of faq[topic]) {
+            if (text.toLowerCase().includes(q.toLowerCase().split(" ")[0])) {
+              append(a, 'bot');
+              answered = true;
+              return;
+            }
           }
         }
-      }, 300);
+        if (!answered) append("I'm not sure about that yet. Try picking a topic below 👇", 'bot');
+      }, 500);
     }
 
-    // Greet on load
-    window.onload = () => append("👋 Hi, I’m LaunchBuddy! Ask me about induction week or type 'schedule' to start.", 'bot');
+    // Initial greet
+    window.onload = () => {
+      append("👋 Hi, I'm <strong>LaunchBuddy</strong> — your guide to induction week in LCS at Leeds!");
+      setTimeout(() => append("You can type a question, or choose a topic below to get started."), 1000);
+      setTimeout(() => showOptions(), 2000);
+    };
   </script>
 </body>
 </html>
