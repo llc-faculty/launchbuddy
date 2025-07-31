@@ -17,11 +17,11 @@
     .bot { background: #e0f0ff; text-align: left; border-top-left-radius: 0; }
     .user { background: #d0ffd8; text-align: right; border-top-right-radius: 0; }
     .avatar {
-  width: 40px;
-  vertical-align: middle;
-  margin-right: 5px;
-  border-radius: 50%;
-}
+      width: 40px;
+      vertical-align: middle;
+      margin-right: 5px;
+      border-radius: 50%;
+    }
     .options button {
       background: #eee; border: none; margin: 4px; padding: 8px 12px;
       border-radius: 5px; cursor: pointer;
@@ -45,27 +45,32 @@
     const chat = document.getElementById('chat');
 
     const faq = {
-      "settling": [
-        ["Does everyone know more than I do?", "No! Relax. Somebody might have a bit of info you don’t yet, but that’s always true. By Christmas, you won’t even remember worrying about this."],
-        ["Is it OK to be scared?", "Yes — pretty much everyone is. You're doing something new. Your confidence will grow quickly and you’ll settle in. Year one is about finding your feet and foundation knowledge."]
+      "getting_around": [
+        ["Where is the campus?", "Use campus maps or your phone. You get 10 mins between classes to get from one place to another."]
       ],
-      "essentials": [
-        ["What do I need to know about registration and modules?", "You need to register as a student. Visit the ground floor of the Parkinson Building, or register online. Your compulsory modules will be added automatically."],
-        ["How important is my university email?", "Very, very, very important. We’ll switch to only using your uni email quickly — add it to your phone early so you don’t miss anything."],
-        ["What essential things do I need to do in the first two weeks?", "If you're registered and enrolled, you're set! Explore Minerva, visit the Union, try a tour, and start building your routine."]
-      ],
-      "academic": [
-        ["Do I get a personal tutor?", "Yes! Your Academic Personal Tutor (APT) supports you all through your studies. Meet them early and keep in touch for both academic and personal support."],
-        ["How do I avoid plagiarism?", "Don’t worry — guidance will come. Focus on settling in first. Later, you’ll learn about academic integrity and referencing. If you're curious, check the Library site."]
+      "social_life": [
+        ["How do I make friends?", "Everyone starts somewhere. Attend social events, join societies, and give yourself time. Many people feel unsure at first!"],
+        ["Do I have to drink to socialise?", "Not at all. Leeds offers many alcohol-free events. The Union has something for everyone."]
       ],
       "support": [
-        ["I’m a disabled student — what should I do?", "If we haven’t already contacted you, self-refer to Disability Services ASAP. You may also need a needs assessment. We’ll get support in place quickly."]
+        ["Where can I get help for my mental health?", "Student counselling is free and easy to access. You can self-refer online."],
+        ["What if I have a disability?", "Contact Disability Services as soon as possible. They’ll help get everything in place for you."]
       ],
-      "programme": [
-        ["I'm a Joint Honours student — how does it work?", "You have a parent (LCS) and a partner school. Your tutor is in LCS. You may feel more connection to LCS — that’s normal. Ask your tutor if you need help."]
+      "academics": [
+        ["What’s the difference between lectures and seminars?", "Lectures are large and structured. Tutorials/seminars are small and interactive."],
+        ["How do I avoid plagiarism?", "Read guidance on referencing and academic integrity. Year 1 is for learning – we don’t expect you to be perfect."]
       ],
-      "identity": [
-        ["Am I in the right place?", "Many students arrive from different routes — Foundation Years, Access, school, etc. If you're unsure about your programme, speak to your APT or Programme Support quickly."]
+      "registration": [
+        ["How do I register and enrol?", "Register online and then check your timetable in the Leeds app. You need 120 credits each year."]
+      ],
+      "email": [
+        ["How do I get my uni email?", "You’ll receive it after registering. Add it to your phone – we’ll use this to contact you from now on."]
+      ],
+      "tutors": [
+        ["What’s an academic personal tutor?", "They support your academic and personal journey. Meet them early and keep in touch."]
+      ],
+      "changing": [
+        ["Can I change my course?", "Yes – but act quickly. Talk to us in the first couple of weeks to explore your options."]
       ]
     };
 
@@ -73,8 +78,7 @@
       const div = document.createElement('div');
       div.className = 'msg ' + who;
       div.innerHTML = who === "bot"
-        ? `<img src="https://campuspress.leeds.ac.uk/launchlcs/files/2025/07/rp_chatbot.jpg" class="avatar" alt="LaunchBuddy"/>
- <span>${text}</span>`
+        ? `<img src="https://campuspress.leeds.ac.uk/launchlcs/files/2025/07/rp_chatbot.jpg" class="avatar" alt="LaunchBuddy"/> <span>${text}</span>`
         : text;
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
@@ -85,12 +89,14 @@
       div.className = 'options';
       div.innerHTML = `
         <p><strong>What would you like help with?</strong></p>
-        <button onclick="listQuestions('settling')">👋 Settling In</button>
-        <button onclick="listQuestions('essentials')">📋 Essentials</button>
-        <button onclick="listQuestions('academic')">🎓 Academic Support</button>
-        <button onclick="listQuestions('programme')">🧭 Programme Info</button>
-        <button onclick="listQuestions('support')">♿ Support</button>
-        <button onclick="listQuestions('identity')">❓ Feeling Unsure</button>
+        <button onclick="listQuestions('getting_around')">🗺️ Getting Around</button>
+        <button onclick="listQuestions('social_life')">👥 Social Life & Friends</button>
+        <button onclick="listQuestions('support')">🧠 Support & Wellbeing</button>
+        <button onclick="listQuestions('academics')">📚 Learning & Teaching</button>
+        <button onclick="listQuestions('registration')">📝 Registration & Timetable</button>
+        <button onclick="listQuestions('email')">📬 University Email</button>
+        <button onclick="listQuestions('tutors')">🧑‍🏫 Personal Tutors</button>
+        <button onclick="listQuestions('changing')">🔁 Changing Programme</button>
       `;
       chat.appendChild(div);
     }
@@ -110,27 +116,36 @@
 
     function send() {
       const input = document.getElementById('inp');
-      const text = input.value.trim();
+      const text = input.value.trim().toLowerCase();
       if (!text) return;
       append(text, 'user');
       input.value = '';
 
       setTimeout(() => {
-        let answered = false;
-        for (let topic in faq) {
-          for (let [q, a] of faq[topic]) {
-            if (text.toLowerCase().includes(q.toLowerCase().split(" ")[0])) {
-              append(a, 'bot');
-              answered = true;
-              return;
-            }
+        let matched = false;
+        const keywords = {
+          "getting_around": ["lost", "where", "map", "navigate"],
+          "social_life": ["friends", "lonely", "alcohol", "party", "social"],
+          "support": ["mental", "health", "counselling", "disability", "support"],
+          "academics": ["lecture", "seminar", "plagiarism", "class", "learning"],
+          "registration": ["register", "enrol", "modules", "credits", "timetable"],
+          "email": ["email", "outlook", "messages"],
+          "tutors": ["tutor", "apt", "support"],
+          "changing": ["change", "wrong", "switch", "programme"]
+        };
+
+        for (let topic in keywords) {
+          if (keywords[topic].some(keyword => text.includes(keyword))) {
+            listQuestions(topic);
+            matched = true;
+            break;
           }
         }
-        if (!answered) append("I'm not sure about that yet. Try picking a topic below 👇", 'bot');
+
+        if (!matched) append("I'm not sure about that yet. Try picking a topic below 👇", 'bot');
       }, 500);
     }
 
-    // Initial greet
     window.onload = () => {
       append("👋 Hi, I'm <strong>LaunchBuddy</strong> — your guide to induction week in LCS at Leeds!");
       setTimeout(() => append("You can type a question, or choose a topic below to get started."), 1000);
