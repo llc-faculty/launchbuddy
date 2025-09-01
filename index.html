@@ -5,75 +5,87 @@
   <title>LaunchBuddy Chatbot</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-    #chatbox {
-      max-width: 400px;
-      margin: auto;
-      background: white;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .msg { margin: 10px 0; padding: 10px; border-radius: 10px; line-height: 1.4em; }
+    #chatbox { max-width: 420px; margin: auto; background: white; border-radius: 10px; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
+    .msg { margin: 10px 0; padding: 10px; border-radius: 10px; line-height: 1.5; }
     .bot { background: #e0f0ff; text-align: left; border-top-left-radius: 0; }
-    .user { background: #d0ffd8; text-align: right; border-top-right-radius: 0; }
-    .avatar {
-      width: 40px;
-      vertical-align: middle;
-      margin-right: 5px;
-      border-radius: 50%;
-    }
-    .options button {
-      background: #eee; border: none; margin: 4px; padding: 8px 12px;
-      border-radius: 5px; cursor: pointer;
-    }
+    .user { background: #d0ffd8; text-align: right; border-top-right-radius: 0; white-space: pre-wrap;}
+    .avatar { width: 40px; vertical-align: middle; margin-right: 8px; border-radius: 50%; }
+    .options button { background: #eee; border: none; margin: 4px; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
     #inputArea { margin-top: 10px; display: flex; gap: 10px; }
-    input[type="text"] {
-      flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px;
-    }
+    input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    button.send { padding: 10px 14px; border: none; background: #2563eb; color: #fff; border-radius: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
   <div id="chatbox">
-    <div id="chat"></div>
+    <div id="chat" aria-live="polite"></div>
     <div id="inputArea">
-      <input type="text" id="inp" placeholder="Ask a question..."/>
-      <button onclick="send()">Send</button>
+      <input type="text" id="inp" placeholder="Ask a question..." aria-label="Type your question" />
+      <button class="send" onclick="send()">Send</button>
     </div>
   </div>
 
   <script>
     const chat = document.getElementById('chat');
 
+    // --- DATA GENERATED FROM THE SPREADSHEET ---
+    // faq: { topicKey: [ [QuestionShown, LaunchBuddyAnswer], ... ] }
     const faq = {
-      "getting_around": [
-        ["Where is the campus?", "Use campus maps or your phone. You get 10 mins between classes to get from one place to another."]
-      ],
-      "social_life": [
-        ["How do I make friends?", "Everyone starts somewhere. Attend social events, join societies, and give yourself time. Many people feel unsure at first!"],
-        ["Do I have to drink to socialise?", "Not at all. Leeds offers many alcohol-free events. The Union has something for everyone."]
-      ],
-      "support": [
-        ["Where can I get help for my mental health?", "Student counselling is free and easy to access. You can self-refer online."],
-        ["What if I have a disability?", "Contact Disability Services as soon as possible. They’ll help get everything in place for you."]
-      ],
-      "academics": [
-        ["What’s the difference between lectures and seminars?", "Lectures are large and structured. Tutorials/seminars are small and interactive."],
-        ["How do I avoid plagiarism?", "Read guidance on referencing and academic integrity. Year 1 is for learning – we don’t expect you to be perfect."]
-      ],
-      "registration": [
-        ["How do I register and enrol?", "Register online and then check your timetable in the Leeds app. You need 120 credits each year."]
-      ],
-      "email": [
-        ["How do I get my uni email?", "You’ll receive it after registering. Add it to your phone – we’ll use this to contact you from now on."]
-      ],
-      "tutors": [
-        ["What’s an academic personal tutor?", "They support your academic and personal journey. Meet them early and keep in touch."]
-      ],
-      "changing": [
-        ["Can I change my course?", "Yes – but act quickly. Talk to us in the first couple of weeks to explore your options."]
-      ]
+  "getting_around": [
+    ["Where is the campus?", `Use campus maps or your phone. You get 10 mins between classes to get from one place to another.`]
+  ],
+  "social_life": [
+    ["How do I make friends?", `Everyone starts somewhere. Attend social events, join societies, and give yourself time. Many people feel unsure at first!`],
+    ["Do I have to drink to socialise?", `Not at all. Leeds offers many alcohol-free events. The Union has something for everyone.`]
+  ],
+  "support": [
+    ["Where can I get help for my mental health?", `Student counselling is free and easy to access. You can self-refer online.`],
+    ["What if I have a disability?", `Contact Disability Services as soon as possible. They’ll help get everything in place for you.`]
+  ],
+  "academics": [
+    ["What’s the difference between lectures and seminars?", `Lectures are large and structured. Tutorials/seminars are small and interactive.`],
+    ["How do I avoid plagiarism?", `Read guidance on referencing and academic integrity. Year 1 is for learning – we don’t expect you to be perfect.`]
+  ],
+  "registration": [
+    ["How do I register and enrol?", `Register online and then check your timetable in the Leeds app. You need 120 credits each year.`]
+  ],
+  "email": [
+    ["How do I get my uni email?", `You’ll receive it after registering. Add it to your phone – we’ll use this to contact you from now on.`]
+  ],
+  "tutors": [
+    ["What’s an academic personal tutor?", `They support your academic and personal journey. Meet them early and keep in touch.`]
+  ],
+  "changing": [
+    ["Can I change my course?", `Yes – but act quickly. Talk to us in the first couple of weeks to explore your options.`]
+  ]
+};
+
+    // keywords: { topicKey: ["trigger1","trigger2", ...] }
+    // (These are the words/phrases a student can type to pull up that topic)
+    const keywords = {
+  "getting_around": ["lost", "where", "map", "navigate"],
+  "social_life": ["friends", "lonely", "alcohol", "party", "social"],
+  "support": ["mental", "health", "counselling", "disability", "support"],
+  "academics": ["lecture", "seminar", "plagiarism", "class", "learning"],
+  "registration": ["register", "enrol", "modules", "credits", "timetable"],
+  "email": ["email", "outlook", "messages"],
+  "tutors": ["tutor", "apt", "support"],
+  "changing": ["change", "wrong", "switch", "programme"]
+};
+
+    // Labels for the topic buttons shown on screen
+    const buttonLabels = {
+      "getting_around": "🗺️ Getting Around",
+      "social_life": "👥 Social Life & Friends",
+      "support": "🧠 Support & Wellbeing",
+      "academics": "📚 Learning & Teaching",
+      "registration": "📝 Registration & Timetable",
+      "email": "📬 University Email",
+      "tutors": "🧑‍🏫 Personal Tutors",
+      "changing": "🔁 Changing Programme"
     };
 
+    // --- UI HELPERS ---
     function append(text, who="bot") {
       const div = document.createElement('div');
       div.className = 'msg ' + who;
@@ -89,25 +101,21 @@
       div.className = 'options';
       div.innerHTML = `
         <p><strong>What would you like help with?</strong></p>
-        <button onclick="listQuestions('getting_around')">🗺️ Getting Around</button>
-        <button onclick="listQuestions('social_life')">👥 Social Life & Friends</button>
-        <button onclick="listQuestions('support')">🧠 Support & Wellbeing</button>
-        <button onclick="listQuestions('academics')">📚 Learning & Teaching</button>
-        <button onclick="listQuestions('registration')">📝 Registration & Timetable</button>
-        <button onclick="listQuestions('email')">📬 University Email</button>
-        <button onclick="listQuestions('tutors')">🧑‍🏫 Personal Tutors</button>
-        <button onclick="listQuestions('changing')">🔁 Changing Programme</button>
+        ${Object.entries(buttonLabels).map(([key,label]) =>
+          `<button onclick="listQuestions('${key}')">${label}</button>`).join('')}
       `;
       chat.appendChild(div);
     }
 
     function listQuestions(topic) {
-      faq[topic].forEach(([q, a]) => {
+      const items = faq[topic] || [];
+      if (!items.length) { append("No questions in this topic yet — try another.", "bot"); return; }
+      items.forEach(([q, a]) => {
         const btn = document.createElement('button');
-        btn.innerText = q;
+        btn.innerText = q || "(Untitled question)";
         btn.onclick = () => {
-          append(q, 'user');
-          setTimeout(() => append(a, 'bot'), 300);
+          append(btn.innerText, 'user');
+          setTimeout(() => append(a || "Answer coming soon.", 'bot'), 300);
         };
         chat.appendChild(btn);
       });
@@ -116,40 +124,31 @@
 
     function send() {
       const input = document.getElementById('inp');
-      const text = input.value.trim().toLowerCase();
+      const text = (input.value || "").trim();
       if (!text) return;
       append(text, 'user');
       input.value = '';
 
       setTimeout(() => {
-        let matched = false;
-        const keywords = {
-          "getting_around": ["lost", "where", "map", "navigate"],
-          "social_life": ["friends", "lonely", "alcohol", "party", "social"],
-          "support": ["mental", "health", "counselling", "disability", "support"],
-          "academics": ["lecture", "seminar", "plagiarism", "class", "learning"],
-          "registration": ["register", "enrol", "modules", "credits", "timetable"],
-          "email": ["email", "outlook", "messages"],
-          "tutors": ["tutor", "apt", "support"],
-          "changing": ["change", "wrong", "switch", "programme"]
-        };
-
+        const t = text.toLowerCase();
+        let matchedTopic = null;
         for (let topic in keywords) {
-          if (keywords[topic].some(keyword => text.includes(keyword))) {
-            listQuestions(topic);
-            matched = true;
-            break;
-          }
+          const words = keywords[topic] || [];
+          if (words.some(w => t.includes(w))) { matchedTopic = topic; break; }
         }
-
-        if (!matched) append("I'm not sure about that yet. Try picking a topic below 👇", 'bot');
-      }, 500);
+        if (matchedTopic) {
+          listQuestions(matchedTopic);
+        } else {
+          append("I'm not sure about that yet. Try picking a topic below 👇", 'bot');
+        }
+      }, 400);
     }
 
+    // Greeting
     window.onload = () => {
       append("👋 Hi, I'm <strong>LaunchBuddy</strong> — your guide to induction week in LCS at Leeds!");
-      setTimeout(() => append("You can type a question, or choose a topic below to get started."), 1000);
-      setTimeout(() => showOptions(), 2000);
+      setTimeout(() => append("You can type a question, or choose a topic below to get started."), 800);
+      setTimeout(() => showOptions(), 1600);
     };
   </script>
 </body>
